@@ -21,23 +21,7 @@ const getWeekDays = (date) => {
   return weekDays;
 };
 
-const WeekView = ({ events, collaborators, organizationId, setEventToEdit, error, currentDate }) => {
-
-  const handleDelete = async (eventId) => {
-    if (!organizationId) {
-      console.error('Cannot delete event: Organization ID is missing.');
-      return;
-    }
-    if (!window.confirm('Are you sure you want to delete this event?')) {
-      return;
-    }
-    try {
-      const eventDocRef = doc(db, 'organizations', organizationId, 'events', eventId);
-      await deleteDoc(eventDocRef);
-    } catch (err) {
-      console.error('Failed to delete event.', err);
-    }
-  };
+const WeekView = ({ events, collaborators, setEventToEdit, error, currentDate, handleDeleteRequest }) => {
 
   const weekDays = getWeekDays(currentDate);
 
@@ -53,7 +37,7 @@ const WeekView = ({ events, collaborators, organizationId, setEventToEdit, error
             <div key={isoDate} className="bg-white p-4 rounded-lg shadow-md">
               <h3 className="font-bold text-lg border-b pb-2 mb-2">{dayName} <span className="text-sm font-normal text-gray-500">{date.getDate()}</span></h3>
               <div className="space-y-2">
-                {events && events.filter(event => event.date === isoDate)
+                {events && events.filter(event => event.virtualDate === isoDate)
                        .sort((a, b) => a.time.localeCompare(b.time))
                        .map(event => (
                   <div key={event.id} className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
@@ -66,7 +50,7 @@ const WeekView = ({ events, collaborators, organizationId, setEventToEdit, error
                     )}
                     <div className="flex justify-end space-x-2 mt-2">
                       <button onClick={() => setEventToEdit(event)} className="text-xs text-blue-500 hover:underline">Edit</button>
-                      <button onClick={() => handleDelete(event.id)} className="text-xs text-red-500 hover:underline">Delete</button>
+                      <button onClick={() => handleDeleteRequest(event)} className="text-xs text-red-500 hover:underline">Delete</button>
                     </div>
                   </div>
                 ))}

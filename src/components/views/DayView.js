@@ -2,23 +2,7 @@ import React from 'react';
 import { db } from '../../services/firebaseConfig';
 import { doc, deleteDoc } from 'firebase/firestore';
 
-const DayView = ({ events, collaborators, organizationId, setEventToEdit, currentDate }) => {
-
-  const handleDelete = async (eventId) => {
-    if (!organizationId) {
-      console.error('Cannot delete event: Organization ID is missing.');
-      return;
-    }
-    if (!window.confirm('Are you sure you want to delete this event?')) {
-      return;
-    }
-    try {
-      const eventDocRef = doc(db, 'organizations', organizationId, 'events', eventId);
-      await deleteDoc(eventDocRef);
-    } catch (err) {
-      console.error('Failed to delete event.', err);
-    }
-  };
+const DayView = ({ events, collaborators, setEventToEdit, currentDate, handleDeleteRequest }) => {
 
   const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
   const dayDate = currentDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -46,7 +30,7 @@ const DayView = ({ events, collaborators, organizationId, setEventToEdit, curren
               </div>
               <div className="flex space-x-4">
                 <button onClick={() => setEventToEdit(event)} className="text-sm text-blue-500 hover:underline">Edit</button>
-                <button onClick={() => handleDelete(event.id)} className="text-sm text-red-500 hover:underline">Delete</button>
+                <button onClick={() => handleDeleteRequest(event)} className="text-sm text-red-500 hover:underline">Delete</button>
               </div>
             </div>
           ))

@@ -49,7 +49,7 @@ const MonthView = ({ events, setEventToEdit, currentDate, setCurrentDate, setAct
             return <div key={`empty-${index}`} className="border rounded-md h-32 bg-gray-100"></div>;
           }
           const isoDate = getISODate(day);
-          const eventsForDay = events.filter(event => event.date === isoDate);
+          const eventsForDay = events.filter(event => event.virtualDate === isoDate);
 
           return (
             <div key={isoDate} onClick={() => handleDayClick(day)} className="border rounded-md h-32 p-2 bg-white cursor-pointer hover:bg-indigo-50">
