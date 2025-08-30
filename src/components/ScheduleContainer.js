@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../services/firebaseConfig';
 import { collection, query, onSnapshot, doc, getDoc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { generateEvents } from '../services/eventGenerator';
+import { detectConflicts } from '../services/conflictDetector';
 import { checkUpcomingEvents } from '../services/notificationService';
 import WeekView from './views/WeekView';
 import MonthView from './views/MonthView';
@@ -13,6 +14,7 @@ const getISODate = (date) => date.toISOString().split('T')[0];
 const ScheduleContainer = ({ user, setEventToEdit, onNotificationsUpdate }) => {
   const [baseEvents, setBaseEvents] = useState([]);
   const [virtualEvents, setVirtualEvents] = useState([]);
+  const [conflictingEvents, setConflictingEvents] = useState(new Set());
   const [collaborators, setCollaborators] = useState([]);
   const [organizationId, setOrganizationId] = useState(null);
   const [error, setError] = useState('');
@@ -55,6 +57,12 @@ const ScheduleContainer = ({ user, setEventToEdit, onNotificationsUpdate }) => {
     generate();
   }, [collaboratorFilteredEvents, currentDate]);
 
+  // Conflict detection
+  useEffect(() => {
+    const conflictingIds = detectConflicts(virtualEvents);
+    setConflictingEvents(conflictingIds);
+  }, [virtualEvents]);
+
   // Notification checker
   useEffect(() => {
     const interval = setInterval(() => {
@@ -96,7 +104,7 @@ const ScheduleContainer = ({ user, setEventToEdit, onNotificationsUpdate }) => {
 
   const renderActiveView = () => {
     // ... (logic remains the same)
-    const commonProps = { collaborators, organizationId, setEventToEdit, currentDate, handleDeleteRequest, error };
+    const commonProps = { collaborators, organizationId, setEventToEdit, currentDate, handleDeleteRequest, error, conflictingEvents };
     switch(activeView) {
       case 'month': return <MonthView {...commonProps} events={virtualEvents} setCurrentDate={setCurrentDate} setActiveView={setActiveView} />;
       case 'day': const eventsForDay = virtualEvents.filter(e => e.virtualDate === getISODate(currentDate)); return <DayView {...commonProps} events={eventsForDay} />;

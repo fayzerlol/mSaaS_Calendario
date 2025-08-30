@@ -3,7 +3,7 @@ import React from 'react';
 // Helper to get date in YYYY-MM-DD format
 const getISODate = (date) => date.toISOString().split('T')[0];
 
-const MonthView = ({ events, setEventToEdit, currentDate, setCurrentDate, setActiveView }) => {
+const MonthView = ({ events, setEventToEdit, currentDate, setCurrentDate, setActiveView, conflictingEvents }) => {
 
   const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -50,13 +50,14 @@ const MonthView = ({ events, setEventToEdit, currentDate, setCurrentDate, setAct
           }
           const isoDate = getISODate(day);
           const eventsForDay = events.filter(event => event.virtualDate === isoDate);
+          const dayHasConflict = eventsForDay.some(event => conflictingEvents.has(event.id));
 
           return (
-            <div key={isoDate} onClick={() => handleDayClick(day)} className="border rounded-md h-32 p-2 bg-white cursor-pointer hover:bg-indigo-50">
+            <div key={isoDate} onClick={() => handleDayClick(day)} className={`border rounded-md h-32 p-2 bg-white cursor-pointer hover:bg-indigo-50 ${dayHasConflict ? 'border-red-400' : ''}`}>
               <span className="font-bold">{day.getDate()}</span>
               <div className="mt-1 text-xs space-y-1">
                 {eventsForDay.slice(0, 2).map(event => (
-                  <div key={event.id} className="bg-indigo-200 p-1 rounded truncate">
+                  <div key={event.id} className={`${conflictingEvents.has(event.id) ? 'bg-red-300' : 'bg-indigo-200'} p-1 rounded truncate`}>
                     {event.title}
                   </div>
                 ))}

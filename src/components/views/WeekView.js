@@ -21,7 +21,7 @@ const getWeekDays = (date) => {
   return weekDays;
 };
 
-const WeekView = ({ events, collaborators, setEventToEdit, error, currentDate, handleDeleteRequest }) => {
+const WeekView = ({ events, collaborators, setEventToEdit, error, currentDate, handleDeleteRequest, conflictingEvents }) => {
 
   const weekDays = getWeekDays(currentDate);
 
@@ -39,10 +39,17 @@ const WeekView = ({ events, collaborators, setEventToEdit, error, currentDate, h
               <div className="space-y-2">
                 {events && events.filter(event => event.virtualDate === isoDate)
                        .sort((a, b) => a.time.localeCompare(b.time))
-                       .map(event => (
-                  <div key={event.id} className="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
+                       .map(event => {
+                  const isConflicting = conflictingEvents.has(event.id);
+                  return (
+                  <div key={event.id} className={`p-3 rounded-lg border ${isConflicting ? 'bg-red-50 border-red-300' : 'bg-indigo-50 border-indigo-200'}`}>
                     <p className="font-semibold">{event.title}</p>
                     <p className="text-sm text-gray-600">{event.time}</p>
+                    {isConflicting && (
+                      <p className="text-xs text-red-700 mt-1 font-bold">
+                        Conflict detected!
+                      </p>
+                    )}
                     {event.assignedCollaborator && (
                       <p className="text-xs text-indigo-700 mt-1">
                         Assigned to: {collaborators.find(c => c.id === event.assignedCollaborator)?.name || '...'}
@@ -53,7 +60,8 @@ const WeekView = ({ events, collaborators, setEventToEdit, error, currentDate, h
                       <button onClick={() => handleDeleteRequest(event)} className="text-xs text-red-500 hover:underline">Delete</button>
                     </div>
                   </div>
-                ))}
+                )})
+                }
               </div>
             </div>
           )
