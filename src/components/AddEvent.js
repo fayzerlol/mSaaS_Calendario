@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../services/firebaseConfig';
 import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp, query, onSnapshot } from 'firebase/firestore';
 
+// Helper to get date in YYYY-MM-DD format
+const getISODate = (date) => date.toISOString().split('T')[0];
+
 const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
   // Form state
   const [title, setTitle] = useState('');
-  const [day, setDay] = useState('Mon');
+  const [date, setDate] = useState(getISODate(new Date())); // Changed from 'day' to 'date'
   const [time, setTime] = useState('');
   const [assignedCollaborator, setAssignedCollaborator] = useState('');
 
@@ -41,12 +44,12 @@ const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
   useEffect(() => {
     if (isEditMode) {
       setTitle(eventToEdit.title);
-      setDay(eventToEdit.day);
+      setDate(eventToEdit.date); // Changed from 'day'
       setTime(eventToEdit.time);
       setAssignedCollaborator(eventToEdit.assignedCollaborator || '');
     } else {
       setTitle('');
-      setDay('Mon');
+      setDate(getISODate(new Date()));
       setTime('');
       setAssignedCollaborator('');
     }
@@ -57,8 +60,8 @@ const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
     setError('');
     setSuccess('');
 
-    if (!title || !time) {
-      setError('Title and time are required.');
+    if (!title || !time || !date) {
+      setError('Title, date, and time are required.');
       return;
     }
     if (!organizationId) {
@@ -66,7 +69,7 @@ const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
       return;
     }
 
-    const eventData = { title, day, time, assignedCollaborator: assignedCollaborator || null };
+    const eventData = { title, date, time, assignedCollaborator: assignedCollaborator || null };
 
     try {
       if (isEditMode) {
@@ -84,7 +87,7 @@ const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
         setSuccess('Event added successfully!');
         // Reset form
         setTitle('');
-        setDay('Mon');
+        setDate(getISODate(new Date()));
         setTime('');
         setAssignedCollaborator('');
       }
@@ -104,11 +107,9 @@ const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
       <h3 className="text-xl font-bold mb-4">{isEditMode ? 'Edit Event' : 'Add New Event'}</h3>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Event Title" className="md:col-span-2 p-2 border rounded-md" />
-          <select value={day} onChange={(e) => setDay(e.target.value)} className="p-2 border rounded-md">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (<option key={d} value={d}>{d}</option>))}
-          </select>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="p-2 border rounded-md" />
           <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="p-2 border rounded-md" />
           <select value={assignedCollaborator} onChange={(e) => setAssignedCollaborator(e.target.value)} className="p-2 border rounded-md">
             <option value="">Unassigned</option>

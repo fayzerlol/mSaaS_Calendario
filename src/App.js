@@ -4,7 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import SignUp from './components/SignUp';
 import SignIn from './components/SignIn';
 import SignOut from './components/SignOut';
-import Schedule from './components/Schedule';
+import ScheduleContainer from './components/ScheduleContainer';
 import AddEvent from './components/AddEvent';
 import CollaboratorManager from './components/CollaboratorManager';
 
@@ -35,7 +35,7 @@ function App() {
               <SignOut />
             </div>
             <AddEvent user={user} eventToEdit={eventToEdit} setEventToEdit={setEventToEdit} />
-            <Schedule user={user} setEventToEdit={setEventToEdit} />
+            <ScheduleContainer user={user} setEventToEdit={setEventToEdit} />
             <CollaboratorManager user={user} />
           </div>
         ) : (
