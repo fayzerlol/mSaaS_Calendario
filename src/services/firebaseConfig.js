@@ -3,17 +3,15 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCJuwpZ6bCYP1OakRWHLH0X_ZCRXToWLjc",
+  authDomain: "msaascal.firebaseapp.com",
+  projectId: "msaascal",
+  storageBucket: "msaascal.firebasestorage.app",
+  messagingSenderId: "208111425167",
+  appId: "1:208111425167:web:a27e5ad1bc158d427fc2fa",
+  measurementId: "G-MPZ5Q9W4FY"
 };
 
 // Initialize Firebase
