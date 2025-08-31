@@ -8,7 +8,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCJuwpZ6bCYP1OakRWHLH0X_ZCRXToWLjc",
   authDomain: "msaascal.firebaseapp.com",
   projectId: "msaascal",
-  storageBucket: "msaascal.firebasestorage.app",
+      storageBucket: "msaascal.appspot.com",
   messagingSenderId: "208111425167",
   appId: "1:208111425167:web:a27e5ad1bc158d427fc2fa",
   measurementId: "G-MPZ5Q9W4FY"
