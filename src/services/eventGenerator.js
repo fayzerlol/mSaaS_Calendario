@@ -4,18 +4,37 @@ import { collection, getDocs } from 'firebase/firestore';
 // Helper to get date in YYYY-MM-DD format
 const getISODate = (date) => date.toISOString().split('T')[0];
 
-export const generateEvents = async (baseEvents, viewStartDate, viewEndDate) => {
+/**
+ * Generate a flattened list of event occurrences ("virtual events") for the given
+ * date range. When handling recurring events this function also merges in any
+ * per-instance edits or deletions stored under the parent event's `exceptions`
+ * subcollection.  Because exception documents live under an organization's
+ * events collection (i.e. organizations/{organizationId}/events/{eventId}/exceptions),
+ * this helper requires the caller to pass the current `organizationId`.  Without
+ * this information the function would incorrectly look for exceptions at the
+ * top-level `events` collection.
+ *
+ * @param {Array} baseEvents      The list of base events queried from Firestore.
+ * @param {Date} viewStartDate    The start of the range for which to generate events.
+ * @param {Date} viewEndDate      The end of the range for which to generate events.
+ * @param {string} organizationId The organization ID used to locate exception docs.
+ * @returns {Promise<Array>}      A promise resolving to an array of virtual events.
+ */
+export const generateEvents = async (baseEvents, viewStartDate, viewEndDate, organizationId) => {
   const virtualEvents = [];
 
   for (const event of baseEvents) {
-    // Fetch exceptions for this event
-    const exceptionsCollectionRef = collection(db, 'events', event.id, 'exceptions');
-    const exceptionsSnapshot = await getDocs(exceptionsCollectionRef);
-    const exceptions = {};
-    exceptionsSnapshot.forEach(doc => {
-      const data = doc.data();
-      exceptions[data.originalDate] = { id: doc.id, ...data };
-    });
+    // Fetch exceptions for this event.  Exceptions are stored under
+    // organizations/{organizationId}/events/{eventId}/exceptions.
+    let exceptions = {};
+    if (organizationId) {
+      const exceptionsCollectionRef = collection(db, 'organizations', organizationId, 'events', event.id, 'exceptions');
+      const exceptionsSnapshot = await getDocs(exceptionsCollectionRef);
+      exceptionsSnapshot.forEach(doc => {
+        const data = doc.data();
+        exceptions[data.originalDate] = { id: doc.id, ...data };
+      });
+    }
 
     // If it's a non-recurring event
     if (!event.recurrence) {
@@ -61,10 +80,17 @@ export const generateEvents = async (baseEvents, viewStartDate, viewEndDate) => 
 
       // Increment to the next occurrence
       switch (type) {
-        case 'daily': currentDate.setDate(currentDate.getDate() + 1); break;
-        case 'weekly': currentDate.setDate(currentDate.getDate() + 7); break;
-        case 'monthly': currentDate.setMonth(currentDate.getMonth() + 1); break;
-        default: return; // Should not happen
+        case 'daily':
+          currentDate.setDate(currentDate.getDate() + 1);
+          break;
+        case 'weekly':
+          currentDate.setDate(currentDate.getDate() + 7);
+          break;
+        case 'monthly':
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          break;
+        default:
+          return;
       }
     }
   }
