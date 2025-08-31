@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../services/firebaseConfig';
 import { collection, query, onSnapshot, doc, getDoc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -51,7 +52,7 @@ const ScheduleContainer = ({ user, setEventToEdit, onNotificationsUpdate }) => {
     const generate = async () => {
       const start = new Date(new Date(currentDate).setDate(currentDate.getDate() - 35));
       const end = new Date(new Date(currentDate).setDate(currentDate.getDate() + 35));
-      const newEvents = await generateEvents(collaboratorFilteredEvents, start, end);
+      const newEvents = await generateEvents(collaboratorFilteredEvents, start, end, organizationId);
       setVirtualEvents(newEvents);
     };
     generate();
