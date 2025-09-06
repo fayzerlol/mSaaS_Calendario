@@ -1,0 +1,71 @@
+*** Begin Patch
+*** Update File: src/App.js
+@@
+ import NotificationPanel from './components/NotificationPanel';
++import TaskBoard from './components/TaskBoard';
+@@ function App() {
+   const [notifications, setNotifications] = useState([]);
+   const [showPanel, setShowPanel] = useState(false);
++  const [showTaskBoard, setShowTaskBoard] = useState(false);
++  const organizationId = user ? user.uid : null;
+@@
+   return (
+@@
+-              <div className="flex items-center space-x-4">
+-                <div className="relative">
+-                  <NotificationBell count={notifications.length} onClick={() => setShowPanel(prev => !prev)} />
+-                  {showPanel && <NotificationPanel notifications={notifications} onDismiss={dismissNotification} />}
+-                </div>
+-                <SignOut />
+-              </div>
++              <div className="flex items-center space-x-4">
++                <button
++                  className="bg-blue-500 text-white px-3 py-1 rounded"
++                  onClick={() => setShowTaskBoard(prev => !prev)}
++                >
++                  {showTaskBoard ? 'Calend\u00e1rio' : 'Task Board'}
++                </button>
++                <div className="relative">
++                  <NotificationBell count={notifications.length} onClick={() => setShowPanel(prev => !prev)} />
++                  {showPanel && <NotificationPanel notifications={notifications} onDismiss={dismissNotification} />}
++                </div>
++                <SignOut />
++              </div>
+@@
+-            <main>
+-              <AddEvent user={user} eventToEdit={eventToEdit} setEventToEdit={setEventToEdit} />
+-              <ScheduleContainer
+-                user={user}
+-                setEventToEdit={setEventToEdit}
+-                onNotificationsUpdate={setNotifications}
+-              />
+-              <CollaboratorManager user={user} />
+-            </main>
++            <main>
++              {showTaskBoard ? (
++                <TaskBoard
++                  organizationId={organizationId}
++                  onNotificationsUpdate={(taskNotifications) =>
++                    setNotifications((prev) => {
++                      const ids = new Set(taskNotifications.map((t) => t.id));
++                      return [...taskNotifications, ...prev.filter((p) => !ids.has(p.id))];
++                    })
++                  }
++                />
++              ) : (
++                <>
++                  <AddEvent
++                    user={user}
++                    eventToEdit={eventToEdit}
++                    setEventToEdit={setEventToEdit}
++                  />
++                  <ScheduleContainer
++                    user={user}
++                    setEventToEdit={setEventToEdit}
++                    onNotificationsUpdate={setNotifications}
++                  />
++                  <CollaboratorManager user={user} />
++                </>
++              )}
++            </main>
+*** End Patch
