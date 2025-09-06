@@ -8,7 +8,7 @@ const getISODate = (date) => date.toISOString().split('T')[0];
 const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
   // Form state
   const [title, setTitle] = useState('');
-  const [date, setDate] = useState(getISODate(new Date())); // Changed from 'day' to 'date'
+  const [date, setDate] = useState(getISODate(new Date()));
   const [time, setTime] = useState('');
   const [assignedCollaborator, setAssignedCollaborator] = useState('');
 
@@ -20,7 +20,6 @@ const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
 
   const isEditMode = !!eventToEdit;
 
-  // Effect to get org ID and listen for collaborators
   useEffect(() => {
     if (!user) return;
     let unsubscribe = () => {};
@@ -40,11 +39,10 @@ const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
     return () => unsubscribe();
   }, [user]);
 
-  // Effect to populate form when in edit mode
   useEffect(() => {
     if (isEditMode) {
       setTitle(eventToEdit.title);
-      setDate(eventToEdit.date); // Changed from 'day'
+      setDate(eventToEdit.date);
       setTime(eventToEdit.time);
       setAssignedCollaborator(eventToEdit.assignedCollaborator || '');
     } else {
@@ -133,3 +131,4 @@ const AddEvent = ({ user, eventToEdit, setEventToEdit }) => {
 };
 
 export default AddEvent;
+// cleaned redundant re-exports
