@@ -1,24 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import SignOut from './components/SignOut';
-import NotificationBell from './components/NotificationBell';
-import NotificationPanel from './components/NotificationPanel';
-import AddEvent from './components/AddEvent';
-import ScheduleContainer from './components/ScheduleContainer';
-import CollaboratorManager from './components/CollaboratorManager';
-import TaskBoard from './components/TaskBoard';
+import React, { useState } from 'react';
+import SignOut from './components/SignOut.jsx';
+import NotificationBell from './components/NotificationBell.jsx';
+import NotificationPanel from './components/NotificationPanel.jsx';
+import AddEvent from './components/AddEvent.jsx';
+import ScheduleContainer from './components/ScheduleContainer.jsx';
+import CollaboratorManager from './components/CollaboratorManager.jsx';
+import TaskBoard from './components/TaskBoard.jsx';
 
 function App({ user }) {
   const [notifications, setNotifications] = useState([]);
   const [showPanel, setShowPanel] = useState(false);
   const [showTaskBoard, setShowTaskBoard] = useState(false);
 
-  // Estados já usados no app original
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedCollaborator, setSelectedCollaborator] = useState(null);
   const [collaboratorFilter, setCollaboratorFilter] = useState([]);
   const [refresh, setRefresh] = useState(false);
 
-  // Usado por calendar e pelo TaskBoard
   const organizationId = user ? (user.uid || user.id || null) : null;
 
   const dismissNotification = (id) => {
@@ -86,6 +84,7 @@ function App({ user }) {
               selectedCollaborator={selectedCollaborator}
               collaboratorFilter={collaboratorFilter}
               setCollaboratorFilter={setCollaboratorFilter}
+              refresh={refresh}
             />
 
             <CollaboratorManager
