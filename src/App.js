@@ -1,50 +1,104 @@
-import React, { useState, useEffect } from 'react';
-import { auth } from './services/firebaseConfig';
-import { onAuthStateChanged } from 'firebase/auth';
-import SignUp from './components/SignUp';
-import SignIn from './components/SignIn';
+import React, { useEffect, useState } from 'react';
 import SignOut from './components/SignOut';
-import ScheduleContainer from './components/ScheduleContainer';
+import NotificationBell from './components/NotificationBell';
+import NotificationPanel from './components/NotificationPanel';
 import AddEvent from './components/AddEvent';
+import ScheduleContainer from './components/ScheduleContainer';
 import CollaboratorManager from './components/CollaboratorManager';
+import TaskBoard from './components/TaskBoard';
 
-function App() {
-  const [user, setUser] = useState(null);
-  const [eventToEdit, setEventToEdit] = useState(null);
+function App({ user }) {
+  const [notifications, setNotifications] = useState([]);
+  const [showPanel, setShowPanel] = useState(false);
+  const [showTaskBoard, setShowTaskBoard] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-        setEventToEdit(null); // Clear editing state on logout
-      }
-    });
+  // Estados já usados no app original
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedCollaborator, setSelectedCollaborator] = useState(null);
+  const [collaboratorFilter, setCollaboratorFilter] = useState([]);
+  const [refresh, setRefresh] = useState(false);
 
-    return () => unsubscribe();
-  }, []);
+  // Usado por calendar e pelo TaskBoard
+  const organizationId = user ? (user.uid || user.id || null) : null;
+
+  const dismissNotification = (id) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
-      <div className="w-full max-w-6xl mt-8">
-        {user ? (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold">Welcome, {user.email}</h1>
-              <SignOut />
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow">
+        <div className="container mx-auto p-4 flex items-center justify-between">
+          <h1 className="text-xl font-semibold">mSaaS Calendário</h1>
+          <div className="flex items-center gap-3">
+            <button
+              className="bg-blue-500 text-white px-3 py-1 rounded"
+              onClick={() => setShowTaskBoard((v) => !v)}
+            >
+              {showTaskBoard ? 'Calendário' : 'Task Board'}
+            </button>
+
+            <div className="relative">
+              <NotificationBell
+                count={notifications.length}
+                onClick={() => setShowPanel((p) => !p)}
+              />
+              {showPanel && (
+                <NotificationPanel
+                  notifications={notifications}
+                  onDismiss={dismissNotification}
+                  onClose={() => setShowPanel(false)}
+                />
+              )}
             </div>
-            <AddEvent user={user} eventToEdit={eventToEdit} setEventToEdit={setEventToEdit} />
-            <ScheduleContainer user={user} setEventToEdit={setEventToEdit} />
-            <CollaboratorManager user={user} />
+
+            <SignOut />
           </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto p-4">
+        {showTaskBoard ? (
+          <TaskBoard
+            organizationId={organizationId}
+            onNotificationsUpdate={(n) =>
+              setNotifications((prev) => {
+                const ids = new Set(n.map((x) => x.id));
+                return [...n, ...prev.filter((p) => !ids.has(p.id))];
+              })
+            }
+          />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SignUp />
-            <SignIn />
-          </div>
+          <>
+            <AddEvent
+              user={user}
+              organizationId={organizationId}
+              onAdded={() => setRefresh((r) => !r)}
+            />
+
+            <ScheduleContainer
+              user={user}
+              organizationId={organizationId}
+              notifications={notifications}
+              setNotifications={setNotifications}
+              currentDate={currentDate}
+              setCurrentDate={setCurrentDate}
+              selectedCollaborator={selectedCollaborator}
+              collaboratorFilter={collaboratorFilter}
+              setCollaboratorFilter={setCollaboratorFilter}
+            />
+
+            <CollaboratorManager
+              user={user}
+              organizationId={organizationId}
+              selectedCollaborator={selectedCollaborator}
+              setSelectedCollaborator={setSelectedCollaborator}
+              collaboratorFilter={collaboratorFilter}
+              setCollaboratorFilter={setCollaboratorFilter}
+            />
+          </>
         )}
-      </div>
+      </main>
     </div>
   );
 }
