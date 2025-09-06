@@ -3,18 +3,21 @@ import { db } from '../services/firebaseConfig';
 import { collection, doc, getDoc, addDoc, query, onSnapshot, deleteDoc, updateDoc } from 'firebase/firestore';
 
 const CollaboratorManager = ({ user }) => {
+  // Form state
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [registration, setRegistration] = useState('');
   const [permissions, setPermissions] = useState('user');
 
+  // Component state
   const [collaborators, setCollaborators] = useState([]);
   const [organizationId, setOrganizationId] = useState(null);
   const [error, setError] = useState('');
-  const [editingCollaborator, setEditingCollaborator] = useState(null);
+  const [editingCollaborator, setEditingCollaborator] = useState(null); // State to hold the collaborator being edited
 
   const isEditMode = !!editingCollaborator;
 
+  // Effect to get org ID and listen for collaborators
   useEffect(() => {
     if (!user) return;
     let unsubscribe = () => {};
@@ -34,6 +37,7 @@ const CollaboratorManager = ({ user }) => {
     return () => unsubscribe();
   }, [user]);
 
+  // Effect to populate form when edit mode is triggered
   useEffect(() => {
     if (isEditMode) {
       setName(editingCollaborator.name);
@@ -41,12 +45,16 @@ const CollaboratorManager = ({ user }) => {
       setRegistration(editingCollaborator.registration);
       setPermissions(editingCollaborator.permissions);
     } else {
-      setName('');
-      setRole('');
-      setRegistration('');
-      setPermissions('user');
+      clearForm();
     }
   }, [editingCollaborator, isEditMode]);
+
+  const clearForm = () => {
+    setName('');
+    setRole('');
+    setRegistration('');
+    setPermissions('user');
+  };
 
   const handleCancelEdit = () => {
     setEditingCollaborator(null);
@@ -75,6 +83,7 @@ const CollaboratorManager = ({ user }) => {
         const collabsCollectionRef = collection(db, 'organizations', organizationId, 'collaborators');
         await addDoc(collabsCollectionRef, collaboratorData);
       }
+      clearForm();
       setError('');
     } catch (err) {
       setError(`Failed to ${isEditMode ? 'update' : 'add'} collaborator.`);
@@ -137,4 +146,3 @@ const CollaboratorManager = ({ user }) => {
 };
 
 export default CollaboratorManager;
-// cleaned redundant re-export

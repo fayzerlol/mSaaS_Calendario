@@ -1,2 +1,1 @@
-// ...existing code...
-export { default } from './ScheduleContainer.js';
+// cleaned redundant re-export
